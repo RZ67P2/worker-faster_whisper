@@ -2,24 +2,19 @@
 
 [Faster Whisper](https://github.com/guillaumekln/faster-whisper) is designed to process audio files using various Whisper models, with options for transcription formatting, language translation and more.
 
----
-
-[![RunPod](https://api.runpod.io/badge/runpod-workers/worker-faster_whisper)](https://www.runpod.io/console/hub/runpod-workers/worker-faster_whisper)
+> **Fork note:** This is a fork of [runpod-workers/worker-faster_whisper](https://github.com/runpod-workers/worker-faster_whisper) upgraded for **NVIDIA Blackwell / RTX 5090** GPUs. Key differences from upstream:
+> - CUDA 12.8 + cuDNN 9 base image (was CUDA 12.3)
+> - Python 3.11 (was 3.10)
+> - Only the `small` model is baked into the image (upstream bakes all 10)
+> - Dependencies pinned: faster-whisper 1.2.1, ctranslate2 4.7.1, runpod 1.8.2
+>
+> See [UPGRADE_NOTES.md](UPGRADE_NOTES.md) for full details.
 
 ---
 
 ## Models
 
-- tiny
-- base
 - small
-- medium
-- large-v1
-- large-v2
-- large-v3
-- distil-large-v2
-- distil-large-v3
-- turbo
 
 ## Input
 
@@ -27,7 +22,7 @@
 | ----------------------------------- | ----- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `audio`                             | Path  | URL to Audio file                                                                                                                                                      |
 | `audio_base64`                      | str   | Base64-encoded audio file                                                                                                                                              |
-| `model`                             | str   | Choose a Whisper model. Choices: "tiny", "base", "small", "medium", "large-v1", "large-v2", "large-v3", "distil-large-v2", "distil-large-v3", "turbo". Default: "base" |
+| `model`                             | str   | Whisper model. Only `"small"` is available in this build. Default: "small" |
 | `transcription`                     | str   | Choose the format for the transcription. Choices: "plain_text", "formatted_text", "srt", "vtt". Default: "plain_text"                                                  |
 | `translate`                         | bool  | Translate the text to English when set to True. Default: False                                                                                                         |
 | `translation`                       | str   | Choose the format for the translation. Choices: "plain_text", "formatted_text", "srt", "vtt". Default: "plain_text"                                                    |
@@ -55,7 +50,7 @@ The following inputs can be used for testing the model:
 {
   "input": {
     "audio": "https://github.com/runpod-workers/sample-inputs/raw/main/audio/gettysburg.wav",
-    "model": "turbo"
+    "model": "small"
   }
 }
 ```
@@ -82,7 +77,6 @@ producing an output like this:
   "transcription": "Hello and welcome!",
   "translation": null,
   "device": "cuda",
-  "model": "turbo",
-  "translation_time": 0.3796223163604736
+  "model": "small"
 }
 ```
