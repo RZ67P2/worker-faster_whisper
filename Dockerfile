@@ -1,6 +1,6 @@
-# faster-whisper turbo needs cudnnn >= 9
-# see https://github.com/runpod-workers/worker-faster_whisper/pull/44
-FROM nvidia/cuda:12.3.2-cudnn9-runtime-ubuntu22.04
+# Blackwell (RTX 5090) requires CUDA >= 12.8 and cuDNN 9
+# "cudnn" tag (no version suffix) includes cuDNN 9.x — naming changed in CUDA 12.4+
+FROM nvidia/cuda:12.8.0-cudnn-runtime-ubuntu22.04
 
 # Remove any third-party apt sources to avoid issues with expiring keys.
 RUN rm -f /etc/apt/sources.list.d/*.list
@@ -21,12 +21,13 @@ RUN apt-get update -y && \
     apt-get clean -y && \
     rm -rf /var/lib/apt/lists/*
 
-# Install Python 3.10
-RUN apt-get update -y && \
-    apt-get install python3.10 python3.10-dev python3.10-venv python3-pip -y --no-install-recommends && \
-    ln -s /usr/bin/python3.10 /usr/bin/python && \
+# Install Python 3.11 via deadsnakes PPA (not available natively on Ubuntu 22.04)
+RUN add-apt-repository ppa:deadsnakes/ppa && \
+    apt-get update -y && \
+    apt-get install python3.11 python3.11-dev python3.11-venv python3-pip -y --no-install-recommends && \
+    ln -s /usr/bin/python3.11 /usr/bin/python && \
     rm -f /usr/bin/python3 && \
-    ln -s /usr/bin/python3.10 /usr/bin/python3 && \
+    ln -s /usr/bin/python3.11 /usr/bin/python3 && \
     apt-get autoremove -y && \
     apt-get clean -y && \
     rm -rf /var/lib/apt/lists/*
