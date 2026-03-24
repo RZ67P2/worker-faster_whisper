@@ -12,7 +12,7 @@ INPUT_VALIDATIONS = {
     'model': {
         'type': str,
         'required': False,
-        'default': 'base'
+        'default': 'small'  # Only 'small' is baked into the image
     },
     'transcription': {
         'type': str,
