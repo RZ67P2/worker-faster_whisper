@@ -4,7 +4,7 @@
       "name": "basic_test",
       "input": {
         "audio": "https://github.com/runpod-workers/sample-inputs/raw/main/audio/gettysburg.wav",
-        "model": "turbo",
+        "model": "small",
         "transcription": "plain text",
         "translate": false,
         "temperature": 0,
@@ -24,6 +24,7 @@
     "gpuTypeId": "NVIDIA GeForce RTX 4090",
     "gpuCount": 1,
     "allowedCudaVersions": [
+      "12.8",
       "12.7",
       "12.6",
       "12.5",
