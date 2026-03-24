@@ -1,3 +1,4 @@
-runpod~=1.7.9
-
-faster-whisper==1.1.0
+# Pinned for Blackwell / CUDA 12.8 compatibility
+runpod==1.8.2
+faster-whisper==1.2.1
+ctranslate2==4.7.1
