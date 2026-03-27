@@ -1,6 +1,7 @@
 # Blackwell (RTX 5090) requires CUDA >= 12.8 and cuDNN 9
-# "cudnn" tag (no version suffix) includes cuDNN 9.x — naming changed in CUDA 12.4+
-FROM nvidia/cuda:12.8.0-cudnn-runtime-ubuntu22.04
+# RunPod serverless RTX 5090 hosts run driver 570.x (native CUDA 12.9 support)
+# CUDA 12.8.1 runs natively on driver 570+ — no forward compat needed
+FROM nvidia/cuda:12.8.1-cudnn-runtime-ubuntu22.04
 
 # Remove any third-party apt sources to avoid issues with expiring keys.
 RUN rm -f /etc/apt/sources.list.d/*.list
