@@ -6,7 +6,6 @@ rp_debugger:
 The handler must be called with --rp_debugger flag to enable it.
 """
 import base64
-import subprocess
 import tempfile
 
 from rp_schema import INPUT_VALIDATIONS
@@ -15,16 +14,6 @@ from runpod.serverless.utils.rp_validator import validate
 import runpod
 import predict
 
-# --- GPU diagnostic (remove after confirming deployment works) ---
-try:
-    smi = subprocess.run(["nvidia-smi"], capture_output=True, text=True, timeout=10)
-    print("=== nvidia-smi ===")
-    print(smi.stdout)
-    if smi.stderr:
-        print(smi.stderr)
-except Exception as e:
-    print(f"nvidia-smi failed: {e}")
-# --- end diagnostic ---
 
 MODEL = predict.Predictor()
 MODEL.setup()

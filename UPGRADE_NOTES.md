@@ -1,8 +1,8 @@
 # Upgrade Notes: Blackwell / RTX 5090
 
-**Date:** 2026-03-24
+**Date:** 2026-03-28
 **Branch:** main
-**Commit range:** fa4087c..c9bfadf
+**Commit range:** fa4087c..62decfa
 
 ---
 
@@ -15,6 +15,8 @@
 | `fdf25b8` | Pin faster-whisper 1.2.1, ctranslate2 4.7.1, runpod 1.8.2 |
 | `346281e` | Bake only `small` model at build time, restrict AVAILABLE_MODELS |
 | `c9bfadf` | Update test inputs and configs for Blackwell |
+| `830a020` | Update README and add UPGRADE_NOTES for Blackwell |
+| `62decfa` | Fix CUDA base image to 12.8.1 for driver 570 compat |
 
 ---
 
@@ -22,8 +24,8 @@
 
 | Component | Previous | New |
 |---|---|---|
-| Base image | `nvidia/cuda:12.3.2-cudnn9-runtime-ubuntu22.04` | `nvidia/cuda:12.8.0-cudnn-runtime-ubuntu22.04` |
-| CUDA | 12.3.2 | 12.8.0 |
+| Base image | `nvidia/cuda:12.3.2-cudnn9-runtime-ubuntu22.04` | `nvidia/cuda:12.8.1-cudnn-runtime-ubuntu22.04` |
+| CUDA | 12.3.2 | 12.8.1 |
 | cuDNN | 9.x | 9.x (tag naming changed: `cudnn` instead of `cudnn9`) |
 | Python | 3.10 | 3.11 (via deadsnakes PPA) |
 | faster-whisper | 1.1.0 | 1.2.1 |
@@ -38,8 +40,8 @@
 - **Registry:** docker.io/rz67p2/faster-whisper-blackwell
 - **Tags pushed:**
   - `blackwell-latest`
-  - `blackwell-c9bfadf`
-- **Digest:** `sha256:000f7a8a872fdf1cbbe82e0d42721640d7a1e0ce0702359c2d817f237536ce38`
+  - `blackwell-62decfa`
+- **Digest:** `sha256:ba4821ae56e53505c42dd1507f226e9dbd017f5e6b9b5bf613bb6c016abfe369`
 - **Platform:** linux/amd64
 
 ---
@@ -64,30 +66,27 @@ The handler contract is **preserved**. All input fields and output fields are un
 
 ## GPU validation
 
-**Status:** Not completed via API.
+**Status:** Confirmed working on RTX 5090 via RunPod Serverless (2026-03-28).
 
-The Docker Hub repo is private, so the RunPod on-demand pod could not pull the image. Validation should be performed via the first serverless test job after configuring the template and endpoint in the RunPod UI.
+- **Host driver:** 570.195.03
+- **GPU:** NVIDIA GeForce RTX 5090 (32GB)
+- **CUDA:** 12.8.1 (runs natively on driver 570+, no forward compat needed)
+- **ctranslate2:** PTX 8.7 JIT-compiles to sm_120 (Blackwell) at runtime
+- **Performance:** ~2x faster than A40 endpoint
 
-**What to verify on first deployment:**
-1. Serverless logs show the RTX 5090 GPU detected
-2. Model loads successfully from HuggingFace cache
-3. Transcription completes and returns the expected shape:
-   ```json
-   {
-     "segments": [...],
-     "detected_language": "en",
-     "transcription": "...",
-     "translation": null,
-     "device": "cuda",
-     "model": "small"
-   }
-   ```
+### CUDA version history
+
+| CUDA version | Result | Reason |
+|---|---|---|
+| 12.8.0 | Failed ("unsupported display driver") | Tested on host with driver 580.x |
+| 12.9.1 | Failed ("forward compat on non supported HW") | CUDA 12.9.1 > driver 570's native 12.9.0 support; compat library failed |
+| **12.8.1** | **Working** | Runs natively on driver 570+ |
 
 ---
 
 ## Manual steps required (RunPod UI)
 
-1. **Update the existing template** to point to image `rz67p2/faster-whisper-blackwell:blackwell-latest`
+1. **Update the existing template** to point to image `rz67p2/faster-whisper-blackwell:blackwell-62decfa`
 2. **Configure Docker Hub credentials** in the template (repo is private)
 3. **Set GPU type** to RTX 5090
 4. **Set minimum CUDA version** to 12.8 in endpoint config
@@ -97,7 +96,7 @@ The Docker Hub repo is private, so the RunPod on-demand pod could not pull the i
 
 ## Risks and follow-up
 
-- **ctranslate2 4.7.1 on Blackwell:** The PyPI wheel is built against CUDA 12.x. Blackwell support is expected but not yet confirmed on a real RTX 5090. The first serverless job is the definitive test.
+- **Driver version variance:** RunPod serverless hosts may have different driver versions. CUDA 12.8.1 is confirmed on driver 570.x. If future hosts run older drivers (< 565), the image may fail. Monitor logs for CUDA errors.
 - **runpod SDK 1.8.2:** Minor version bump from 1.7.9. No breaking changes observed in the handler's usage (`serverless.start`, `rp_cuda`, `rp_validator`, `download_files_from_urls`).
 - **Image size:** Significantly smaller than before (1 model vs 10). Cold start should be faster.
 - **If more models are needed later:** Add them to `model_names` in `builder/fetch_models.py` and `AVAILABLE_MODELS` in `src/predict.py`, then rebuild and push.
